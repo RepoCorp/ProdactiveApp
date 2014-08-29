@@ -1,0 +1,13 @@
+<resources>
+    
+    <!-- Strings related to login -->
+    <string name="prompt_user">Usuario</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Inicio Sessión</string>
+
+    <string name="error_invalid_user">El Usuario no debe contener espacios.</string>
+    <string name="error_invalid_password">Contraseña muy corta.</string>
+    <string name="error_incorrect_password">Contraseña Incorrecta.</string>
+    <string name="error_field_required">El campo es requerido.</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ProdactiveApp</string>
+    <string name="title_activity_pedometro">Prodactive</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_splash_screen">ProdactiveApp</string>
+    <string name="message_report_data">Se ha enviado reporte de información.</string>
+</resources>

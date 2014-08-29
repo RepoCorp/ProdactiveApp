@@ -1,0 +1,142 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="co.com.zeitgeist.prodactiveapp.activity.PedometroActivity">
+
+    <ScrollView
+        android:id="@+id/login_form"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <LinearLayout
+            android:id="@+id/pedometer_form"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView3"
+                android:src="@drawable/logo" />
+
+            <TextView
+                android:id="@+id/user_data"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Usuario:"
+                android:gravity="right"
+                android:paddingTop="10dp"/>
+        </LinearLayout>
+    </ScrollView>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/><View
+    android:layout_width="fill_parent"
+    android:layout_height="1dp"
+    android:layout_marginBottom="20dp"
+    android:background="@android:color/darker_gray"/>
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="30dp"
+            android:gravity="center">
+
+            <!--TextView
+
+                android:textSize="40dp"
+                android:layout_weight=".5"
+                /-->
+            <TextView android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:textSize="30dp"
+                android:text="Deporte: Caminar "
+                android:gravity="center"
+                android:textColor="#ff03899c" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="80dp">
+            <!--    <ImageView
+                    android:layout_width="fill_parent"
+                    android:layout_height="80dp"
+                    android:layout_weight=".7" android:src="@drawable/recuadro_pasos"
+                    />-->
+            <TextView
+                android:background="@drawable/recuadro_pasos"
+                android:layout_width="fill_parent"
+                android:layout_height="80dp" android:layout_gravity="center" android:gravity="center"
+                android:text="Conteo: Pasos" android:textSize="30dp"
+
+                android:textColor="#ffffffff" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="80dp"
+                android:layout_weight=".5"
+                android:text="0"
+                android:gravity="center"
+                android:textSize="60dp"
+                android:id="@+id/pasosView"
+                android:background="#ff70e53c"
+                android:textAlignment="center" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageView
+
+                android:layout_width="260dp"
+                android:layout_height="fill_parent"
+                android:layout_weight=".7" android:src="@drawable/calorias"
+                />
+
+            <TextView
+
+                android:layout_width="fill_parent"
+                android:layout_height="80dp"
+                android:layout_weight=".4"
+                android:text="0"
+                android:gravity="center"
+                android:id="@+id/caloriasView"
+                android:background="#ffff7a00"
+                android:textSize="60dp"
+                android:textColor="#ffffffff" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
