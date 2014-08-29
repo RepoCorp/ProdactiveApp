@@ -23,15 +23,13 @@
 
     <ScrollView
         android:id="@+id/login_form"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         >
-
-
         <LinearLayout
                 android:id="@+id/email_login_form"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:orientation="vertical">
 
 
@@ -75,9 +73,19 @@
                     android:background="@drawable/shape_button"
                     />
 
-            </LinearLayout>
-    </ScrollView>
 
+        </LinearLayout>
+
+    </ScrollView>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtLink"
+        android:text="prueba"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        android:textSize="20sp"
+        android:layout_alignParentBottom="true"/>
 </LinearLayout>
 
 

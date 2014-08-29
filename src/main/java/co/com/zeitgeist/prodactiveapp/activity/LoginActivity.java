@@ -17,7 +17,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +31,7 @@ import android.widget.TextView;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +57,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
     // UI references.
     private EditText mUserView;
     private EditText mPasswordView;
+    private TextView link;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -88,6 +92,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        link =(TextView)  findViewById(R.id.txtLink);
+        String html = "<a href=\"http://prodactive.co\">Regístrate</a>";
+        link.setText(Html.fromHtml(html));
+        link.setMovementMethod(LinkMovementMethod.getInstance());
         loadUserData();
     }
     private void loadUserData()

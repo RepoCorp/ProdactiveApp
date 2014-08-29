@@ -97,6 +97,7 @@ public class StepService extends Service implements SensorEventListener{
         IntentFilter filter = new IntentFilter();
 
         filter.addAction(PedometroActivity.MessageToStepService);
+        filter.addAction(PedometroActivity.InitProdactive);
         registerReceiver(receiver, filter);
         s=this;
     }

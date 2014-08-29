@@ -57,7 +57,7 @@ public class PedometroActivity extends Activity {
     public static String InitProdactive="co.com.zeitgeist.prodactive.INIT_PRODACTIVE";
 
     Activity activity;
-    Receiver broadcastReceiver;
+    //Receiver broadcastReceiver;
     TextView pasos;
     TextView calorias;
     Date     lastReport;
@@ -103,11 +103,11 @@ public class PedometroActivity extends Activity {
         BodyWeight= utils.GetWeight();
 
 
-        broadcastReceiver   = new Receiver(new Handler());
+
         IntentFilter filter = new IntentFilter();
 
         filter.addAction(StepService.Paso);
-        registerReceiver(broadcastReceiver , filter);
+        registerReceiver(receiver , filter);
 
 
 
@@ -151,7 +151,7 @@ public class PedometroActivity extends Activity {
     @Override
     protected void onDestroy()
     {
-        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(receiver);
         unbindStepService();
         SaveLogEjercicio();
         super.onDestroy();
@@ -175,6 +175,73 @@ public class PedometroActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+
+            if(intent.getAction().equals(StepService.Paso))
+            {
+
+                //Contador = utils.incrementSteps();
+
+                //Obtener valores del intent
+
+                if(!sw)
+                {
+                    synchronized (obj)
+                    {
+                        if(!sw)
+                        {
+                            sw = true;
+                            try{
+
+                                int contpasos=intent.getIntExtra(StepService.Steps, 0);
+                                utils.setSteps(contpasos);
+                                //actualizo interfaz gráfica
+                                Calories = contpasos *  (BodyWeight * METRIC_WALKING_FACTOR //(mIsRunning ? METRIC_RUNNING_FACTOR : METRIC_WALKING_FACTOR))
+                                        // Distance:
+                                        * StepLength // centimeters
+                                        / 100000.0); // centimeters/kilometer
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        pasos.setText(utils.getSteps().toString());
+                                        //pasos.setText(s.getSteps().toString());
+                                        calorias.setText(decimalFormat.format(Calories));
+                                        if(lastReport==null)
+                                            lastReport = new Date(SystemClock.elapsedRealtime());
+                                        //verifico si debo reportar
+                                        Date d=new Date(SystemClock.elapsedRealtime());
+                                        //if((d.getTime()-lastReport.getTime())>(5*60*1000))
+                                        if((d.getTime()-lastReport.getTime())>(30*1000))
+                                        {
+                                            SaveLogEjercicio();
+                                            lastReport = new Date(SystemClock.elapsedRealtime());
+                                        }
+                                    }
+                                });
+                            }
+                            catch (Exception e){
+                                Log.e("SendReporte PedometroActivity",e.getMessage());
+                            }
+                            finally {
+                                sw=false;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+        }
+    };
 
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -267,6 +334,8 @@ public class PedometroActivity extends Activity {
     /**
      * Esta clase se encarga de recibir la notificacion de pasos desde el servicio StepService
      */
+
+    /*
     private class Receiver extends BroadcastReceiver
     {
         Handler handler;
@@ -331,6 +400,8 @@ public class PedometroActivity extends Activity {
             }
         }
     };
+
+    /*
 
     /**
      * Revisa constantemente la base de datos de LogEjercicios y lo reporta al servidor
