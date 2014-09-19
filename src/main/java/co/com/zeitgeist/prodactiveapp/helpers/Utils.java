@@ -40,7 +40,13 @@ public class Utils {
     private Utils(SharedPreferences prf)
     {
         p     = Preferences.GetInstance(prf);
-        Steps = LastSteps = 0;
+        int i=p.GetUltimoReporte();
+        if(i==-1)
+            Steps = LastSteps = 0;
+        else
+        {
+            Steps= LastSteps = i;
+        }
     }
 
     public Integer getSteps() {
@@ -55,6 +61,7 @@ public class Utils {
         }
     }
     public void setSteps(Integer steps) {
+
         Steps = steps;
     }
     public Integer GetStepsFromLastReport()
@@ -104,4 +111,28 @@ public class Utils {
         return p.GetHeight();
     }
 
+    public boolean IsSameDay() {
+
+        if(new Date() .getYear() == p.GetCurrentDay().getYear() &&
+                new Date().getMonth() == p.GetCurrentDay().getMonth() &&
+                new Date().getDay() == p.GetCurrentDay().getDay())
+        {
+            return true;
+        }
+        else
+        {
+            //que proceso se hace cuando cabia el dia?
+        return false;
+        }
+
+    }
+
+    public void SetCurrentDate(Date fecha)
+    {
+        p.SetCurrentDay(fecha);
+    }
+
+    public String[] GetUserPass() {
+        return p.GetUserPass();
+    }
 }

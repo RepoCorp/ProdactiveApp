@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.lang.reflect.GenericArrayType;
@@ -49,7 +48,6 @@ public class DbHelper extends SQLiteOpenHelper {
         Cursor c= DB.query(item.GetTableName(),projection,selection,selectionArgs,null,null,sortOrder);
 
     }
-
 
     public ArrayList<Insertable> Select(String query,ITable table)
     {

@@ -45,8 +45,12 @@ public class SplashScreenActivity extends Activity {
             public void run() {
 
                 // Start the next activity
+/*
                 Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, LoginActivity.class);
                 startActivity(mainIntent);
+*/
+                Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, ProdactiveLauch.class);
+                startService(mainIntent);
 
                 // Close the activity so the user won't able to go back this
                 // activity pressing Back button

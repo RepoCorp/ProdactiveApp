@@ -1,6 +1,11 @@
 package co.com.zeitgeist.prodactiveapp.config;
 
 import android.content.SharedPreferences;
+import android.text.format.DateFormat;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by D on 22/08/2014.
@@ -10,10 +15,13 @@ public class Preferences {
     private static String User      = "co.com.zeitgeist.prodactiveapp.user";
     private static String Pass      = "co.com.zeitgeist.prodactiveapp.pass";
     private static String Contador  = "co.com.zeitgeist.prodactiveapp.contador";
+    //private static String TotalStepsDay ="co.com.zeitgeist.prodactiveapp.totalSteps";
 
     private static String Peso      = "co.com.zeitgeist.prodactiveapp.peso";
     private static String Altura    = "co.com.zeitgeist.prodactiveapp.altura";
     private static String Sexo      = "co.com.zeitgeist.prodactiveapp.sexo";
+
+    private static String Fecha      = "co.com.zeitgeist.prodactiveapp.fecha";
 
 
     private static Preferences instance;
@@ -45,7 +53,7 @@ public class Preferences {
 
     public void SaveUltimoReporte(int contador)
     {
-        prf.edit().putInt(Contador,contador);
+        prf.edit().putInt(Contador,contador).apply();
     }
 
     public int GetUltimoReporte()
@@ -75,4 +83,34 @@ public class Preferences {
     {
         return prf.getFloat(Altura,0);
     }
+
+    public Date GetCurrentDay()
+    {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+            String s=prf.getString(Fecha,"");
+            if(s.equals(""))
+            {
+                return new Date();
+            }
+            return formatter.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void SetCurrentDay(Date fecha)
+    {   SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        prf.edit().putString(formatter.format(fecha),"").apply();
+    }
+
+    /*public Integer GetTotalStepsDay() {
+        return prf.getInt(TotalStepsDay,0);
+    }
+
+    public void setTotalStepsDay(Integer value) {
+        prf.edit().putInt(TotalStepsDay,value).apply();
+    }*/
 }

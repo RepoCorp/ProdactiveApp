@@ -27,13 +27,13 @@ import co.com.zeitgeist.prodactiveapp.helpers.Utils;
  */
 public class StepService extends Service implements SensorEventListener{
 
-    public final static String Steps       = "Steps";
-    public final static String UpdatedSteps       = "UpdatedSteps";
-
-    private final static String TAG     = "StepDetector";
+    public final static String Steps        = "Steps";
+    public final static String UpdatedSteps = "UpdatedSteps";
+    private final static String TAG         = "StepDetector";
+    public static String Paso="co.com.zeitgeist.prodactive.PASO";
 
     static StepService s;
-    public static String Paso="co.com.zeitgeist.prodactive.PASO";
+
 
     SensorManager sensorManager;
     Sensor        sensor;
@@ -89,8 +89,9 @@ public class StepService extends Service implements SensorEventListener{
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        Context ctx = getApplicationContext();
-        util=Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(ctx));
+/*        Context ctx = getApplicationContext();
+        util=Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(ctx));*/
+        util=Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
 
         //receiver   = new ComunicationStepServiceReceiver();
 
@@ -104,6 +105,7 @@ public class StepService extends Service implements SensorEventListener{
 
     public void onDestroy()
     {
+        util.UpdateLastStep(util.GetStepsFromLastReport());
         unregisterReceiver(receiver);
         super.onDestroy();
     }
@@ -191,6 +193,7 @@ public class StepService extends Service implements SensorEventListener{
 
         bcIntent.setAction(Paso);
         bcIntent.putExtra (Steps,util.getSteps());
+        //util.setSteps(0);
         sendBroadcast     (bcIntent);
     }
 

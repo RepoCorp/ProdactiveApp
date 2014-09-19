@@ -2,29 +2,28 @@ package co.com.zeitgeist.prodactiveapp.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
+
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -40,6 +39,7 @@ import co.com.zeitgeist.prodactiveapp.R;
 import co.com.zeitgeist.prodactiveapp.config.Preferences;
 import co.com.zeitgeist.prodactiveapp.database.DbHelper;
 import co.com.zeitgeist.prodactiveapp.database.model.LoginResponse;
+import co.com.zeitgeist.prodactiveapp.helpers.Utils;
 import co.com.zeitgeist.prodactiveapp.service.RestService;
 
 
@@ -60,6 +60,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
     private TextView link;
     private View mProgressView;
     private View mLoginFormView;
+    Button mEmailSignInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +83,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,13 +102,17 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
     }
     private void loadUserData()
     {
-        Preferences p     = Preferences.GetInstance (getPreferences(Context.MODE_PRIVATE));
-        String[] userData = p.GetUserPass();
+
+        Utils util= Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
+        String[] userData = util.GetUserPass();
         if(userData[0]!="")
         {
             mUserView.setText(userData[0]);
             mPasswordView.setText(userData[1]);
+            mEmailSignInButton.performClick();
+            //mEmailSignInButton.callOnClick();
         }
+        Log.i("LoadUserData","se carga usuario:"+userData[0]+" pass:"+userData[1]+"" );
     }
 
     /**
@@ -141,7 +146,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
 
         // check for a valid User
         if (!TextUtils.isEmpty(user) && !isUserValid(password)) {
-            mUserView.setError(getString(R.string.error_invalid_password));
+            mUserView.setError(getString(R.string.error_invalid_user));
             focusView = mPasswordView;
             cancel = true;
         }
@@ -173,7 +178,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
     /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    //@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
@@ -270,7 +275,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             //aqui va el logueo
-            Preferences p     = Preferences.GetInstance(activity.getPreferences(Context.MODE_PRIVATE));
+
+            //Preferences p = Preferences.GetInstance(activity.getPreferences(Context.MODE_PRIVATE));
+            Preferences p = Preferences.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
             String[]    datos = p.GetUserPass();
             if(!datos[0].isEmpty() && !datos[1].isEmpty())
             {

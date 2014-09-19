@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,13 +32,10 @@ import org.springframework.web.client.RestTemplate;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import co.com.zeitgeist.prodactiveapp.R;
 import co.com.zeitgeist.prodactiveapp.database.DbHelper;
@@ -65,6 +63,7 @@ public class PedometroActivity extends Activity {
     Utils    utils;
     DbHelper Db;
     private ComunicationStepService s;
+    private String User="";
 
     public  Object obj            = new Object();
     private boolean sw            = false;
@@ -74,8 +73,8 @@ public class PedometroActivity extends Activity {
     private Double  Calories      = 0.0;
     private double StepLength     = 0;
     private double BodyWeight     = 0;
-    //private Integer TimeOutReport = 5*60*1000;
-    private Integer TimeOutReport = 50000;
+    private Integer TimeOutReport = 5*60*1000;
+    //private Integer TimeOutReport = 50000;
 
     private static double METRIC_RUNNING_FACTOR   = 1.02784823;
     private static double IMPERIAL_RUNNING_FACTOR = 0.75031498;
@@ -95,7 +94,7 @@ public class PedometroActivity extends Activity {
         setContentView(R.layout.activity_pedometro);
 
         activity = this;
-        utils    = Utils.GetInstance(this.getPreferences(Context.MODE_PRIVATE));
+        utils    = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
         Db       = new DbHelper(activity);
 
         loadContent();
@@ -145,12 +144,14 @@ public class PedometroActivity extends Activity {
     @Override
     protected void onResume()
     {
+        User=utils.GetUser();
         super.onResume();
     }
 
     @Override
     protected void onDestroy()
     {
+        utils.UpdateLastStep(utils.GetStepsFromLastReport());
         unregisterReceiver(receiver);
         unbindStepService();
         SaveLogEjercicio();
@@ -186,11 +187,6 @@ public class PedometroActivity extends Activity {
 
             if(intent.getAction().equals(StepService.Paso))
             {
-
-                //Contador = utils.incrementSteps();
-
-                //Obtener valores del intent
-
                 if(!sw)
                 {
                     synchronized (obj)
@@ -308,6 +304,7 @@ public class PedometroActivity extends Activity {
     private void loadContent() {
         pasos    = (TextView) findViewById(R.id.pasosView);
         calorias = (TextView) findViewById(R.id.caloriasView);
+
         TextView userdata =(TextView) findViewById(R.id.user_data);
         userdata.setText(" Bienvenido "+utils.GetUser());
     }
@@ -335,74 +332,6 @@ public class PedometroActivity extends Activity {
      * Esta clase se encarga de recibir la notificacion de pasos desde el servicio StepService
      */
 
-    /*
-    private class Receiver extends BroadcastReceiver
-    {
-        Handler handler;
-        Receiver(Handler handler)
-        {
-            this.handler=handler;
-        }
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if(intent.getAction().equals(StepService.Paso))
-            {
-
-                //Contador = utils.incrementSteps();
-                Calories += (BodyWeight * METRIC_WALKING_FACTOR //(mIsRunning ? METRIC_RUNNING_FACTOR : METRIC_WALKING_FACTOR))
-                        // Distance:
-                        * StepLength // centimeters
-                        / 100000.0); // centimeters/kilometer
-                //Obtener valores del intent
-
-                if(!sw)
-                {
-                    synchronized (obj)
-                    {
-                        if(!sw)
-                        {
-                            sw = true;
-                            try{
-
-                                utils.setSteps(intent.getIntExtra(StepService.Steps, 0));
-                                //actualizo interfaz gráfica
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        pasos.setText(utils.getSteps().toString());
-                                        //pasos.setText(s.getSteps().toString());
-                                        calorias.setText(decimalFormat.format(Calories));
-                                        if(lastReport==null)
-                                            lastReport = new Date(SystemClock.elapsedRealtime());
-                                        //verifico si debo reportar
-                                        Date d=new Date(SystemClock.elapsedRealtime());
-                                        //if((d.getTime()-lastReport.getTime())>(5*60*1000))
-                                        if((d.getTime()-lastReport.getTime())>(30*1000))
-                                        {
-                                            SaveLogEjercicio();
-                                            lastReport = new Date(SystemClock.elapsedRealtime());
-                                        }
-                                    }
-                                });
-                            }
-                            catch (Exception e){
-                                Log.e("SendReporte PedometroActivity",e.getMessage());
-                            }
-                            finally {
-                                sw=false;
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    /*
-
     /**
      * Revisa constantemente la base de datos de LogEjercicios y lo reporta al servidor
      */
@@ -417,9 +346,11 @@ public class PedometroActivity extends Activity {
             while(lst.hasNext())
             {
                 LogEjercicio le= (LogEjercicio) lst.next();
+                if(le.Usuario.equals("")) {
+                    le.Usuario =utils.GetUser();
+                }
                 final String url="http://prodactive.co/api/LogEjercicio/"+le.Usuario+"/"+le.Fecha+"/lat=lon=/"+le.Conteo+"/0?format=json";
                 //AsyncTask<String,Void,ServiceResponse> task
-                if(le.Usuario!=""){
                     try{
 
                         RestService<ServiceResponse> sr= new RestService<ServiceResponse>();
@@ -431,12 +362,6 @@ public class PedometroActivity extends Activity {
                     }catch(Exception ex){
                         Log.e("EnvioLogServicio",ex.getMessage());
                     }
-
-                }
-                else
-                {
-                    Db.Delete(le);
-                }
 
                 /*runOnUiThread(new Runnable() {
                     @Override

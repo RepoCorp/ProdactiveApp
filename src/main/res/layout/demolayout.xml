@@ -76,7 +76,7 @@
                 android:textSize="40dp"
                 android:id="@+id/pasosView"
                 android:background="#ff70e500"
-                android:textAlignment="center" />
+                android:gravity="center"                 />
 
         </LinearLayout>
         <LinearLayout
@@ -98,6 +98,7 @@
                 android:id="@+id/caloriasView"
                 android:background="#ff70e500"
                 android:textSize="40dp"
+                android:gravity="center"
                 />
         </LinearLayout>
         <LinearLayout
