@@ -10,14 +10,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
-import java.util.Date;
 
 import co.com.zeitgeist.prodactiveapp.activity.PedometroActivity;
 import co.com.zeitgeist.prodactiveapp.helpers.Utils;
@@ -29,30 +24,31 @@ public class StepService extends Service implements SensorEventListener{
 
     public final static String Steps        = "Steps";
     public final static String UpdatedSteps = "UpdatedSteps";
+    public final static String Paso         = "co.com.zeitgeist.prodactive.PASO";
     private final static String TAG         = "StepDetector";
-    public static String Paso="co.com.zeitgeist.prodactive.PASO";
-
-    static StepService s;
 
 
-    SensorManager sensorManager;
-    Sensor        sensor;
+    private static StepService s;
+
+
+    private SensorManager sensorManager;
+    private Sensor        sensor;
 
 
     //private final IBinder binderService = new LocalBinder();
 
 
-    private float   mLimit = 10;
-    private float   mLastValues[] = new float[3*2];
-    private float   mScale[] = new float[2];
+    private final float   mLimit = 10;
+    private final float   mLastValues[] = new float[3*2];
+    private final float   mScale[] = new float[2];
     private float   mYOffset;
 
-    private float   mLastDirections[] = new float[3*2];
-    private float   mLastExtremes[][] = { new float[3*2], new float[3*2] };
-    private float   mLastDiff[] = new float[3*2];
+    private final float   mLastDirections[] = new float[3*2];
+    private final float   mLastExtremes[][] = { new float[3*2], new float[3*2] };
+    private final float   mLastDiff[] = new float[3*2];
     private int     mLastMatch = -1;
 
-    static Utils util;
+    private static Utils util;
 
 
     public StepService()
@@ -66,18 +62,25 @@ public class StepService extends Service implements SensorEventListener{
 
     }
 
-    BroadcastReceiver receiver= new BroadcastReceiver() {
+    private BroadcastReceiver receiver= new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             if(intent.getAction().equals(PedometroActivity.MessageToStepService))
             {
                 int value=intent.getIntExtra(UpdatedSteps,util.GetStepsFromLastReport());
                 util.UpdateLastStep(value);
             }
-            if(intent.getAction().equals(PedometroActivity.InitProdactive))
+            else if(intent.getAction().equals(PedometroActivity.RestartCounterOnStepService))
+                {
+                    util.RestartSteps();
+                }
+            else if(intent.getAction().equals(PedometroActivity.InitProdactive))
             {
                 SendBroadcast();
             }
+
+
         }
     };
 
@@ -96,7 +99,7 @@ public class StepService extends Service implements SensorEventListener{
         //receiver   = new ComunicationStepServiceReceiver();
 
         IntentFilter filter = new IntentFilter();
-
+        filter.addAction(PedometroActivity.RestartCounterOnStepService);
         filter.addAction(PedometroActivity.MessageToStepService);
         filter.addAction(PedometroActivity.InitProdactive);
         registerReceiver(receiver, filter);

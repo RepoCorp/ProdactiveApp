@@ -1,7 +1,6 @@
 package co.com.zeitgeist.prodactiveapp.config;
 
 import android.content.SharedPreferences;
-import android.text.format.DateFormat;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,16 +11,16 @@ import java.util.Date;
  */
 public class Preferences {
     private SharedPreferences prf;
-    private static String User      = "co.com.zeitgeist.prodactiveapp.user";
-    private static String Pass      = "co.com.zeitgeist.prodactiveapp.pass";
-    private static String Contador  = "co.com.zeitgeist.prodactiveapp.contador";
+    private static final String User      = "co.com.zeitgeist.prodactiveapp.user";
+    private static final String Pass      = "co.com.zeitgeist.prodactiveapp.pass";
+    private static final String Contador  = "co.com.zeitgeist.prodactiveapp.contador";
     //private static String TotalStepsDay ="co.com.zeitgeist.prodactiveapp.totalSteps";
 
-    private static String Peso      = "co.com.zeitgeist.prodactiveapp.peso";
-    private static String Altura    = "co.com.zeitgeist.prodactiveapp.altura";
-    private static String Sexo      = "co.com.zeitgeist.prodactiveapp.sexo";
+    private static final String Peso      = "co.com.zeitgeist.prodactiveapp.peso";
+    private static final String Altura    = "co.com.zeitgeist.prodactiveapp.altura";
+    private static final String Sexo      = "co.com.zeitgeist.prodactiveapp.sexo";
 
-    private static String Fecha      = "co.com.zeitgeist.prodactiveapp.fecha";
+    private static final String Fecha      = "co.com.zeitgeist.prodactiveapp.fecha";
 
 
     private static Preferences instance;
@@ -92,18 +91,20 @@ public class Preferences {
             String s=prf.getString(Fecha,"");
             if(s.equals(""))
             {
-                return new Date();
+                Date d= new Date();
+                SetCurrentDay(d);
+                return d;
             }
             return formatter.parse(s);
         } catch (ParseException e) {
             e.printStackTrace();
-            return null;
+            return new Date(1970,1,1);
         }
     }
 
     public void SetCurrentDay(Date fecha)
     {   SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        prf.edit().putString(formatter.format(fecha),"").apply();
+        prf.edit().putString(Fecha,formatter.format(fecha)).apply();
     }
 
     /*public Integer GetTotalStepsDay() {

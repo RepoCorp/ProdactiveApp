@@ -15,7 +15,6 @@ import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
 
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -26,14 +25,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,49 +36,48 @@ import co.com.zeitgeist.prodactiveapp.R;
 import co.com.zeitgeist.prodactiveapp.database.DbHelper;
 import co.com.zeitgeist.prodactiveapp.database.Insertable;
 import co.com.zeitgeist.prodactiveapp.database.TablaLogEjercicio;
+import co.com.zeitgeist.prodactiveapp.database.model.LogDiario;
 import co.com.zeitgeist.prodactiveapp.database.model.LogEjercicio;
 import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
 import co.com.zeitgeist.prodactiveapp.helpers.Utils;
 import co.com.zeitgeist.prodactiveapp.service.RestService;
-import co.com.zeitgeist.prodactiveapp.service.RestServiceAsyncTask;
 import co.com.zeitgeist.prodactiveapp.service.StepService;
 
 
 public class PedometroActivity extends Activity {
 
-    public static String MessageToStepService="co.com.zeitgeist.prodactive.MESSAGE_TO_STEPSERVICE";
-    public static String InitProdactive="co.com.zeitgeist.prodactive.INIT_PRODACTIVE";
+    public final static  String MessageToStepService="co.com.zeitgeist.prodactive.MESSAGE_TO_STEPSERVICE";
+    public final static String RestartCounterOnStepService="co.com.zeitgeist.prodactive.RESTAR_COUNTER_ON_STEPSERVICE";
+    public final static String InitProdactive="co.com.zeitgeist.prodactive.INIT_PRODACTIVE";
+    public final static String IsRestarted ="restarted";
 
-    Activity activity;
+    private Activity activity;
     //Receiver broadcastReceiver;
-    TextView pasos;
-    TextView calorias;
-    Date     lastReport;
-    Timer    timer;
-    Utils    utils;
-    DbHelper Db;
+    private TextView pasos;
+    private TextView calorias;
+    private Date     lastReport;
+    private Utils    utils;
+    private DbHelper Db;
     private ComunicationStepService s;
-    private String User="";
+    //private String User="";
 
-    public  Object obj            = new Object();
+    private final Object  obj           = new Object();
     private boolean sw            = false;
-    public Object mutex           = new Object();
+    private final Object  mutex         = new Object();
     private boolean sw2           = false;
-   // private Integer Contador      = 0;
     private Double  Calories      = 0.0;
-    private double StepLength     = 0;
-    private double BodyWeight     = 0;
-    private Integer TimeOutReport = 5*60*1000;
-    //private Integer TimeOutReport = 50000;
+    private double  StepLength    = 0;
+    private double  BodyWeight    = 0;
 
-    private static double METRIC_RUNNING_FACTOR   = 1.02784823;
-    private static double IMPERIAL_RUNNING_FACTOR = 0.75031498;
 
-    private static double METRIC_WALKING_FACTOR   = 0.708;
-    private static double IMPERIAL_WALKING_FACTOR = 0.517;
+    private final static double METRIC_RUNNING_FACTOR   = 1.02784823;
+    //private final static double IMPERIAL_RUNNING_FACTOR = 0.75031498;
 
-    DecimalFormatSymbols decimalFormatSymbols     = new DecimalFormatSymbols();
-    DecimalFormat decimalFormat;
+    private final static double METRIC_WALKING_FACTOR   = 0.708;
+    //private final static double IMPERIAL_WALKING_FACTOR = 0.517;
+
+    private DecimalFormatSymbols decimalFormatSymbols     = new DecimalFormatSymbols();
+    private DecimalFormat decimalFormat;
 
 
 
@@ -91,6 +85,9 @@ public class PedometroActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try{
+
+        moveTaskToBack(getIntent().getBooleanExtra(IsRestarted,false));
+
         setContentView(R.layout.activity_pedometro);
 
         activity = this;
@@ -128,8 +125,9 @@ public class PedometroActivity extends Activity {
 
 
         EnvioLogServicio els= new EnvioLogServicio();
-        timer= new Timer();
-        timer.schedule(els,TimeOutReport,TimeOutReport);
+            Timer timer = new Timer();
+            Integer timeOutReport = 5 * 60 * 1000;
+            timer.schedule(els, timeOutReport, timeOutReport);
 
 
         decimalFormatSymbols.setDecimalSeparator('.');
@@ -144,17 +142,19 @@ public class PedometroActivity extends Activity {
     @Override
     protected void onResume()
     {
-        User=utils.GetUser();
+        //User=utils.GetUser();
         super.onResume();
     }
 
     @Override
     protected void onDestroy()
     {
+
         utils.UpdateLastStep(utils.GetStepsFromLastReport());
         unregisterReceiver(receiver);
         unbindStepService();
         SaveLogEjercicio();
+        Log.i("PedometroActivity onDestroy","se ha cerrado la aplicacion");
         super.onDestroy();
     }
 
@@ -179,7 +179,7 @@ public class PedometroActivity extends Activity {
 
 
 
-    BroadcastReceiver receiver = new BroadcastReceiver() {
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -216,9 +216,18 @@ public class PedometroActivity extends Activity {
                                         //verifico si debo reportar
                                         Date d=new Date(SystemClock.elapsedRealtime());
                                         //if((d.getTime()-lastReport.getTime())>(5*60*1000))
-                                        if((d.getTime()-lastReport.getTime())>(30*1000))
+                                        if((d.getTime()-lastReport.getTime())>(30000))
                                         {
-                                            SaveLogEjercicio();
+                                            if(utils.IsSameDay())
+                                            {
+                                                SaveLogEjercicio();
+                                            }
+                                            else
+                                            {
+                                                SaveLogEjercicio();
+                                                SaveLogDiario();
+                                                utils.SetCurrentDate(new Date());
+                                            }
                                             lastReport = new Date(SystemClock.elapsedRealtime());
                                         }
                                     }
@@ -274,6 +283,7 @@ public class PedometroActivity extends Activity {
                         //actualizo el valor en el servicio
                         s.SendDataToService(cont);
                         utils.UpdateLastStep(cont);
+                        Log.i("SaveLogEjercicio" ,"Se ha guardado un registro");
 
                     }
                     sw2=false;
@@ -283,9 +293,29 @@ public class PedometroActivity extends Activity {
 
     }
 
+    private void SaveLogDiario() {
+        Date    fecha   = utils.GetCurrentDate();
+        Integer cont    = utils.getSteps();
+        if(cont>0){
+            LogDiario le     = new LogDiario();
+            le.Velocidad        = (double) 0;
+            le.Conteo           = cont;
+            SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd HHmmss");
+            le.Fecha            = sdf.format(fecha);
+            le.Usuario          = utils.GetUser();
+            Db.Insert(le);
+            utils.RestartSteps();
+            s.RestartCounterOnService();
+            Log.i("SaveLogEjercicio" ,"Se ha guardado un registro");
+            }
+    }
+
+
+
+
     private void GetStepLength(String sexo, double estatura)
     {
-        if (sexo == "M")
+        if (sexo.equals("M"))
         {
             if (estatura != 0)
                 StepLength = estatura*0.415;
@@ -314,8 +344,7 @@ public class PedometroActivity extends Activity {
         //bindService(new Intent(this,ComunicationStepService.class), mConnection, Context.BIND_AUTO_CREATE + Context.BIND_DEBUG_UNBIND);
         Intent msgStepIntent = new Intent(getApplicationContext(),ComunicationStepService.class);
         try{
-          boolean result=  bindService(msgStepIntent, mConnection, Context.BIND_AUTO_CREATE);
-            int j=0;
+            bindService(msgStepIntent, mConnection, Context.BIND_AUTO_CREATE);
         }catch (Exception ex)
         {
             Log.e("Error Bind Service",ex.getMessage());
@@ -335,33 +364,30 @@ public class PedometroActivity extends Activity {
     /**
      * Revisa constantemente la base de datos de LogEjercicios y lo reporta al servidor
      */
-    public class EnvioLogServicio extends TimerTask
+    private class EnvioLogServicio extends TimerTask
     {
         @Override
         public void run() {
 
             Log.i("EnvioLogServicio","Se ha iniciado reporte");
             TablaLogEjercicio t= new TablaLogEjercicio();
-            Iterator<Insertable> lst= Db.Select(t.SelectAll(), t).iterator();
-            while(lst.hasNext())
-            {
-                LogEjercicio le= (LogEjercicio) lst.next();
-                if(le.Usuario.equals("")) {
-                    le.Usuario =utils.GetUser();
+            for (Insertable insertable : Db.Select(t.SelectAll(), t)) {
+                LogEjercicio le = (LogEjercicio) insertable;
+                if (le.Usuario.equals("")) {
+                    le.Usuario = utils.GetUser();
                 }
-                final String url="http://prodactive.co/api/LogEjercicio/"+le.Usuario+"/"+le.Fecha+"/lat=lon=/"+le.Conteo+"/0?format=json";
+                final String url = "http://prodactive.co/api/LogEjercicio/" + le.Usuario + "/" + le.Fecha + "/lat=lon=/" + le.Conteo + "/0?format=json";
                 //AsyncTask<String,Void,ServiceResponse> task
-                    try{
+                try {
 
-                        RestService<ServiceResponse> sr= new RestService<ServiceResponse>();
-                        ServiceResponse response= sr.Send(url,new ServiceResponse());
-                        if(response.State)
-                        {
-                            Db.Delete(le);
-                        }
-                    }catch(Exception ex){
-                        Log.e("EnvioLogServicio",ex.getMessage());
+                    RestService<ServiceResponse> sr = new RestService<ServiceResponse>();
+                    ServiceResponse response = sr.Send(url, new ServiceResponse());
+                    if (response.State) {
+                        Db.Delete(le);
                     }
+                } catch (Exception ex) {
+                    Log.e("EnvioLogServicio", ex.getMessage());
+                }
 
                 /*runOnUiThread(new Runnable() {
                     @Override
@@ -406,13 +432,6 @@ public class PedometroActivity extends Activity {
         }
 
         @Override
-        public void onCreate() {
-            super.onCreate();
-
-        }
-
-
-        @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
             Log.i("ComunicationStepService", "Received start id " + startId + ": " + intent);
             // We want this service to continue running until it is explicitly
@@ -423,6 +442,13 @@ public class PedometroActivity extends Activity {
         @Override
         public IBinder onBind(Intent intent) {
             return mBinder;
+        }
+
+        public void RestartCounterOnService()
+        {
+            Intent bcIntent = new Intent();
+            bcIntent.setAction(RestartCounterOnStepService);
+            sendBroadcast(bcIntent);
         }
 
         public void SendDataToService(Integer value)

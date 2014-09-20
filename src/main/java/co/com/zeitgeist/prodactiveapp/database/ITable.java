@@ -5,7 +5,7 @@ import android.database.Cursor;
 /**
  * Created by D on 22/08/2014.
  */
-public interface ITable {
+interface ITable {
     public String CreateTableSQL();
 
     Insertable SerializeItem(Cursor c);

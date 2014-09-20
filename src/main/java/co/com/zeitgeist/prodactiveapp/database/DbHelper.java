@@ -5,13 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by D on 22/08/2014.
@@ -34,6 +28,7 @@ public class DbHelper extends SQLiteOpenHelper {
     {
         db.execSQL(new TablaPersona().CreateTableSQL());
         db.execSQL(new TablaLogEjercicio().CreateTableSQL());
+        db.execSQL(new TablaLogDiario().CreateTableSQL());
     }
 
     @Override
@@ -41,31 +36,40 @@ public class DbHelper extends SQLiteOpenHelper {
     {
         db.execSQL("DROP TABLE IF EXISTS "+TablaPersona.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS "+TablaLogEjercicio.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS "+TablaLogDiario.TABLE_NAME);
+
     }
 
-    public void Select(Insertable item,String [] projection , String selection,String[] selectionArgs,String sortOrder)
+    /*public void Select(Insertable item,String [] projection , String selection,String[] selectionArgs,String sortOrder)
     {
         Cursor c= DB.query(item.GetTableName(),projection,selection,selectionArgs,null,null,sortOrder);
 
-    }
+    }*/
 
     public ArrayList<Insertable> Select(String query,ITable table)
     {
         ArrayList<Insertable> elm = new ArrayList<Insertable>();
-        Cursor c= DB.rawQuery(query,null);
-        if (c != null ) {
-            if  (c.moveToFirst()) {
-                do {
-                   elm.add(table.SerializeItem(c));
-                }while (c.moveToNext());
+        try{
+            Cursor c= DB.rawQuery(query,null);
+            if (c != null ) {
+                if  (c.moveToFirst()) {
+                    do {
+                        elm.add(table.SerializeItem(c));
+                    }while (c.moveToNext());
+                }
+                c.close();
             }
+
+        }catch(Exception ex )
+        {
+            Log.e("Select",(ex.getMessage()!=null?ex.getMessage():""));
         }
-        c.close();
         return elm;
     }
 
     public boolean Insert(Insertable item)
     {
+
         long result=DB.insert(item.GetTableName(),null,item.GetContentValues());
         if(result>0)
         {
@@ -80,18 +84,12 @@ public class DbHelper extends SQLiteOpenHelper {
     public boolean Update(Insertable item)
     {
         long result = DB.update(item.GetTableName(),item.GetContentValues(),item.GetWhereClause(),null);
-        if(result>0)
-            return true;
-
-        return false;
+        return (result>0);
     }
 
     public boolean Delete(Insertable item)
     {
         long result= DB.delete(item.GetTableName(),item.GetWhereClause(),null);
-        if(result>0)
-            return true;
-
-        return false;
+        return (result>0);
     }
 }

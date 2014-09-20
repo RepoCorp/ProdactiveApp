@@ -1,18 +1,11 @@
 package co.com.zeitgeist.prodactiveapp.helpers;
 
-import android.app.Service;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Parcelable;
-import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import co.com.zeitgeist.prodactiveapp.activity.PedometroActivity;
 import co.com.zeitgeist.prodactiveapp.config.Preferences;
-import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
-import co.com.zeitgeist.prodactiveapp.service.RestService;
 
 /**
  * Created by D on 23/08/2014.
@@ -25,9 +18,9 @@ public class Utils {
     private String  user;
     private Object  obj = new Object();
     private boolean sw  = false;
-    Preferences     p;
+    private Preferences     p;
 
-    Object mutex = new Object();
+    private final Object mutex = new Object();
 
     public static Utils GetInstance(SharedPreferences prf)
     {
@@ -68,7 +61,7 @@ public class Utils {
     {
         synchronized (mutex)
         {
-            Integer pasos=0;
+            Integer pasos;
             if(LastSteps==0)
                 pasos=Steps;
             else
@@ -77,6 +70,7 @@ public class Utils {
             return pasos;
         }
     }
+
     public void UpdateLastStep(Integer value)
     {
         LastSteps += value;
@@ -113,18 +107,16 @@ public class Utils {
 
     public boolean IsSameDay() {
 
-        if(new Date() .getYear() == p.GetCurrentDay().getYear() &&
-                new Date().getMonth() == p.GetCurrentDay().getMonth() &&
-                new Date().getDay() == p.GetCurrentDay().getDay())
-        {
-            return true;
-        }
-        else
-        {
-            //que proceso se hace cuando cabia el dia?
-        return false;
-        }
+        Date d= GetCurrentDate();
+        Date n= new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return(formatter.format(d).equals(formatter.format(n)));
 
+    }
+
+    public Date GetCurrentDate()
+    {
+        return p.GetCurrentDay();
     }
 
     public void SetCurrentDate(Date fecha)
@@ -134,5 +126,11 @@ public class Utils {
 
     public String[] GetUserPass() {
         return p.GetUserPass();
+    }
+
+    public void RestartSteps() {
+        LastSteps = 0;
+        Steps     = 0;
+        p.SaveUltimoReporte(0);
     }
 }

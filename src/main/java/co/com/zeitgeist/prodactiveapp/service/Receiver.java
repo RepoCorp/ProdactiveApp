@@ -7,7 +7,7 @@ import android.content.Intent;
 /**
  * Created by D on 23/08/2014.
  */
-public class Receiver extends BroadcastReceiver
+class Receiver extends BroadcastReceiver
 {
 
     @Override

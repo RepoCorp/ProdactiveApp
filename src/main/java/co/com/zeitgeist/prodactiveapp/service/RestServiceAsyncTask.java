@@ -7,16 +7,15 @@ import android.widget.Toast;
 
 import co.com.zeitgeist.prodactiveapp.R;
 import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
-import co.com.zeitgeist.prodactiveapp.helpers.Utils;
 
 /**
  * Created by D on 23/08/2014.
  * por el momento no se esta usando
  */
-public class RestServiceAsyncTask extends AsyncTask<String, Void,ServiceResponse> {
+class RestServiceAsyncTask extends AsyncTask<String, Void,ServiceResponse> {
 
-    Context context;
-    boolean showToast;
+    private Context context;
+    private boolean showToast;
     public RestServiceAsyncTask(Context context,boolean showToast)
     {
         this.context   = context;

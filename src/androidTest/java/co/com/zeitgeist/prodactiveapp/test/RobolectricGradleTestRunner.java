@@ -6,6 +6,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.res.Fs;
 
+
 public class RobolectricGradleTestRunner extends RobolectricTestRunner {
     private static final int MAX_SDK_SUPPORTED_BY_ROBOLECTRIC = 18;
 

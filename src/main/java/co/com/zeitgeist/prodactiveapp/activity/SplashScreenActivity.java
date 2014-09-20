@@ -2,24 +2,13 @@ package co.com.zeitgeist.prodactiveapp.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 import co.com.zeitgeist.prodactiveapp.R;
-import co.com.zeitgeist.prodactiveapp.database.DbHelper;
-import co.com.zeitgeist.prodactiveapp.database.Insertable;
-import co.com.zeitgeist.prodactiveapp.database.TablaLogEjercicio;
-import co.com.zeitgeist.prodactiveapp.database.model.LogEjercicio;
-import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
-import co.com.zeitgeist.prodactiveapp.service.RestServiceAsyncTask;
+import co.com.zeitgeist.prodactiveapp.service.ProdactiveLauch;
 
 public class SplashScreenActivity extends Activity {
 
@@ -50,6 +39,7 @@ public class SplashScreenActivity extends Activity {
                 startActivity(mainIntent);
 */
                 Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, ProdactiveLauch.class);
+                mainIntent.putExtra("firstLaunch",true);
                 startService(mainIntent);
 
                 // Close the activity so the user won't able to go back this

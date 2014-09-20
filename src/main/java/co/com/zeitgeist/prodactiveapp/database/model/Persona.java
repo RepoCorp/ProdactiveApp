@@ -28,7 +28,7 @@ public class Persona implements Insertable {
     public Double  Peso;
     public Double  Estatura;
 
-    public HashMap<String,String> Cuentas;
+    private HashMap<String,String> Cuentas;
 
     public String        GetTableName    ()
     {

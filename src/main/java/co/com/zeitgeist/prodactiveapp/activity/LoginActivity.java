@@ -4,18 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 
 import android.app.Activity;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -27,13 +21,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import co.com.zeitgeist.prodactiveapp.R;
 import co.com.zeitgeist.prodactiveapp.config.Preferences;
@@ -47,8 +34,8 @@ import co.com.zeitgeist.prodactiveapp.service.RestService;
  * A login screen that offers login via email/password.
 
  */
-public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
-
+//public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
+public class LoginActivity extends Activity{
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -57,15 +44,19 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
     // UI references.
     private EditText mUserView;
     private EditText mPasswordView;
-    private TextView link;
     private View mProgressView;
     private View mLoginFormView;
-    Button mEmailSignInButton;
+    private Button mEmailSignInButton;
+
+    private boolean sw= false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        sw = getIntent().getBooleanExtra("isRestarting",false);
+        Log.i("onCreate LoginActivity","Extra is restarting ="+sw);
 
         // Set up the login form.
         mUserView = (EditText) findViewById(R.id.user);
@@ -94,7 +85,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        link =(TextView)  findViewById(R.id.txtLink);
+        TextView link = (TextView) findViewById(R.id.txtLink);
         String html = "<a href=\"http://prodactive.co\">Regístrate</a>";
         link.setText(Html.fromHtml(html));
         link.setMovementMethod(LinkMovementMethod.getInstance());
@@ -105,7 +96,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
 
         Utils util= Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
         String[] userData = util.GetUserPass();
-        if(userData[0]!="")
+        if(!userData[0].equals(""))
         {
             mUserView.setText(userData[0]);
             mPasswordView.setText(userData[1]);
@@ -120,7 +111,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    public void attemptLogin() {
+    void attemptLogin() {
         if (mAuthTask != null) {
             return;
         }
@@ -179,7 +170,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
      * Shows the progress UI and hides the login form.
      */
     //@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
+    void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -211,7 +202,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         }
     }
 
-    @Override
+  /*  @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(this,
                 // Retrieve data rows for the device user's 'profile' contact.
@@ -227,7 +218,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                 // a primary email address if the user hasn't specified one.
                 ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
     }
-
+*/
+    /*
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         List<String> emails = new ArrayList<String>();
@@ -236,16 +228,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
             cursor.moveToNext();
         }
-
-
-    }
-
+    }*/
+/*
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
-    }
+    }*/
 
-    private interface ProfileQuery {
+    /*private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
@@ -253,7 +243,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
+    }*/
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -301,7 +291,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                 } else
                     return false;
             }catch (Exception ex){
-                int j=0;
                 return false;
             }
             //guardar localmente los datos, para evitar ir al servidor la proxima vez
@@ -316,6 +305,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
 
             if (success) {
                 Intent intent = new Intent(activity, PedometroActivity.class);
+                intent.putExtra(PedometroActivity.IsRestarted,sw);
+                //intent.putExtra(PedometroActivity.IsRestarted,true);
                 startActivity(intent);
                 activity.finish();
                 finish();
