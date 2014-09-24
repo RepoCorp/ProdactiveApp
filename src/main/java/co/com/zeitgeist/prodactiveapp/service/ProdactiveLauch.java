@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class ProdactiveLauch extends Service {
         if(!sw)
             mainIntent.putExtra("isRestarting",true);
         startActivity(mainIntent);
+
         // Close the activity so the user won't able to go back this
         // activity pressing Back button
         return START_STICKY;
@@ -53,21 +55,19 @@ public class ProdactiveLauch extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    /*
     BroadcastReceiver receiverBoot= new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                // Start Service On Boot Start Up
             Intent service = new Intent(context, ProdactiveLauch.class);
             context.startService(service);
 
-            //Start App On Boot Start Up
-            //Intent App = new Intent(context, SplashScreenActivity.class);
-            //App.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //context.startActivity(App);
 
         }
-    };
+    };*/
 }
+
+
 
 
