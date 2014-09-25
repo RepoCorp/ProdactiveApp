@@ -1,5 +1,6 @@
 package co.com.zeitgeist.prodactiveapp.service;
 
+import android.app.ActivityManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,7 +33,6 @@ public class ProdactiveLauch extends Service {
         }catch (NullPointerException ex){
             Log.e("ProdactiveLaunc OnStarCommand","the intent not contain extras");
         }
-
         Intent mainIntent = new Intent().setClass(this, LoginActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if(!sw)
@@ -42,6 +42,16 @@ public class ProdactiveLauch extends Service {
         // Close the activity so the user won't able to go back this
         // activity pressing Back button
         return START_STICKY;
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

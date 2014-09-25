@@ -42,6 +42,7 @@ import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
 import co.com.zeitgeist.prodactiveapp.helpers.Utils;
 import co.com.zeitgeist.prodactiveapp.service.RestService;
 import co.com.zeitgeist.prodactiveapp.service.StepService;
+import co.com.zeitgeist.prodactiveapp.service.UploadService;
 
 
 public class PedometroActivity extends Activity {
@@ -55,22 +56,23 @@ public class PedometroActivity extends Activity {
     //Receiver broadcastReceiver;
     private TextView pasos;
     private TextView calorias;
-    private Date     lastReport;
+    //private Date     lastReport;
     private Utils    utils;
-    private DbHelper Db;
+    //private DbHelper Db;
     private ComunicationStepService s;
     //private String User="";
 
-    private final Object  obj           = new Object();
+    private final Object  obj     = new Object();
     private boolean sw            = false;
-    private final Object  mutex         = new Object();
-    private boolean sw2           = false;
+    //private final Object  mutex   = new Object();
+    //private boolean sw2           = false;
     private Double  Calories      = 0.0;
     private double  StepLength    = 0;
     private double  BodyWeight    = 0;
+    private String  User          = "";
 
 
-    private final static double METRIC_RUNNING_FACTOR   = 1.02784823;
+    //private final static double METRIC_RUNNING_FACTOR   = 1.02784823;
     //private final static double IMPERIAL_RUNNING_FACTOR = 0.75031498;
 
     private final static double METRIC_WALKING_FACTOR   = 0.708;
@@ -92,7 +94,7 @@ public class PedometroActivity extends Activity {
 
         activity = this;
         utils    = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
-        Db       = new DbHelper(activity);
+        //Db       = DbHelper.getInstance(activity);
 
         loadContent();
         GetStepLength(utils.GetSex(),utils.GetHeight());
@@ -105,14 +107,12 @@ public class PedometroActivity extends Activity {
         filter.addAction(StepService.Paso);
         registerReceiver(receiver , filter);
 
-
-
         //startService(msgStepIntent);
-        Intent msgStepIntent = new Intent(this,ComunicationStepService.class);
-        startService(msgStepIntent);
+        Intent intent1 = new Intent(this,ComunicationStepService.class);
+        startService(intent1);
+
         bindStepService();
         //bindService(msgStepIntent,mConnection,Context.BIND_AUTO_CREATE);
-
 
        // bindStepService();
         if(isMyServiceRunning(StepService.class)){
@@ -120,19 +120,20 @@ public class PedometroActivity extends Activity {
         }else
         {
             Intent stepIntent = new Intent(this, StepService.class);
+            stepIntent.putExtra("User",User);
             startService(stepIntent);
         }
-
-
-        EnvioLogServicio els= new EnvioLogServicio();
-            Timer timer = new Timer();
-            Integer timeOutReport = 5 * 60 * 1000;
-            timer.schedule(els, timeOutReport, timeOutReport);
-
-
-        decimalFormatSymbols.setDecimalSeparator('.');
-        decimalFormatSymbols.setGroupingSeparator(',');
-        decimalFormat = new DecimalFormat("#,##0.00", decimalFormatSymbols);
+        if(isMyServiceRunning(UploadService.class)){
+            Toast.makeText(this,"Service was Running",Toast.LENGTH_LONG).show();
+        }else
+        {
+            Intent stepIntent = new Intent(this, UploadService.class);
+            stepIntent.putExtra("User",User);
+            startService(stepIntent);
+        }
+            decimalFormatSymbols.setDecimalSeparator('.');
+            decimalFormatSymbols.setGroupingSeparator(',');
+            decimalFormat = new DecimalFormat("#,##0.00", decimalFormatSymbols);
         //s.SendInitApp();
         }catch(Exception ex)
         {
@@ -149,11 +150,8 @@ public class PedometroActivity extends Activity {
     @Override
     protected void onDestroy()
     {
-
-        utils.UpdateLastStep(utils.GetStepsFromLastReport());
         unregisterReceiver(receiver);
         unbindStepService();
-        SaveLogEjercicio();
         Log.i("PedometroActivity onDestroy","se ha cerrado la aplicacion");
         super.onDestroy();
     }
@@ -207,29 +205,8 @@ public class PedometroActivity extends Activity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-
                                         pasos.setText(utils.getSteps().toString());
-                                        //pasos.setText(s.getSteps().toString());
                                         calorias.setText(decimalFormat.format(Calories));
-                                        if(lastReport==null)
-                                            lastReport = new Date(SystemClock.elapsedRealtime());
-                                        //verifico si debo reportar
-                                        Date d=new Date(SystemClock.elapsedRealtime());
-                                        //if((d.getTime()-lastReport.getTime())>(5*60*1000))
-                                        if((d.getTime()-lastReport.getTime())>(30000))
-                                        {
-                                            if(utils.IsSameDay())
-                                            {
-                                                SaveLogEjercicio();
-                                            }
-                                            else
-                                            {
-                                                SaveLogEjercicio();
-                                                SaveLogDiario();
-                                                utils.SetCurrentDate(new Date());
-                                            }
-                                            lastReport = new Date(SystemClock.elapsedRealtime());
-                                        }
                                     }
                                 });
                             }
@@ -259,60 +236,6 @@ public class PedometroActivity extends Activity {
         return false;
     }
 
-    //guarda los valores del contador en la base de datos local.
-    private void SaveLogEjercicio() {
-        if(!sw2)
-        {
-            synchronized (mutex)
-            {
-                if(!sw2)
-                {
-                    sw2=true;
-                    Date    fecha   = new Date();
-                    Integer cont    = utils.GetStepsFromLastReport();
-
-                    if(cont>0){
-                        LogEjercicio le     = new LogEjercicio();
-                        le.Velocidad        = (double) 0;
-                        le.Conteo           = cont;
-                        le.Ubicacion        = "lat=lon=";
-                        SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd HHmmss");
-                        le.Fecha            = sdf.format(fecha);
-                        le.Usuario          = utils.GetUser();
-                        Db.Insert(le);
-                        //actualizo el valor en el servicio
-                        s.SendDataToService(cont);
-                        utils.UpdateLastStep(cont);
-                        Log.i("SaveLogEjercicio" ,"Se ha guardado un registro");
-
-                    }
-                    sw2=false;
-                }
-            }
-        }
-
-    }
-
-    private void SaveLogDiario() {
-        Date    fecha   = utils.GetCurrentDate();
-        Integer cont    = utils.getSteps();
-        if(cont>0){
-            LogDiario le     = new LogDiario();
-            le.Velocidad        = (double) 0;
-            le.Conteo           = cont;
-            SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd HHmmss");
-            le.Fecha            = sdf.format(fecha);
-            le.Usuario          = utils.GetUser();
-            Db.Insert(le);
-            utils.RestartSteps();
-            s.RestartCounterOnService();
-            Log.i("SaveLogEjercicio" ,"Se ha guardado un registro");
-            }
-    }
-
-
-
-
     private void GetStepLength(String sexo, double estatura)
     {
         if (sexo.equals("M"))
@@ -336,7 +259,8 @@ public class PedometroActivity extends Activity {
         calorias = (TextView) findViewById(R.id.caloriasView);
 
         TextView userdata =(TextView) findViewById(R.id.user_data);
-        userdata.setText(" Bienvenido "+utils.GetUser());
+        User=utils.GetUser();
+        userdata.setText(" Bienvenido "+User);
     }
 
     private void bindStepService() {
@@ -364,6 +288,7 @@ public class PedometroActivity extends Activity {
     /**
      * Revisa constantemente la base de datos de LogEjercicios y lo reporta al servidor
      */
+  /*
     private class EnvioLogServicio extends TimerTask
     {
         @Override
@@ -389,16 +314,16 @@ public class PedometroActivity extends Activity {
                     Log.e("EnvioLogServicio", ex.getMessage());
                 }
 
-                /*runOnUiThread(new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         new RestServiceAsyncTask(activity,true).execute(url);
                     }
-                });*/
+                });
             }
         }
     }
-
+*/
     //objeto que permite comunicar localmente con el servicio ComunicacionStepService, para enviar los
     //broadcast al StepService
     private ServiceConnection mConnection = new ServiceConnection() {

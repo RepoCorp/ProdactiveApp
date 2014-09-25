@@ -16,8 +16,27 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME           = "prodactive.db";
     private static final int    DB_SCHEME_VERSION = 2;
 
-    private SQLiteDatabase DB;
-    public DbHelper(Context context)
+    private final SQLiteDatabase DB;
+
+    private static DbHelper Instance;
+    private static Object mutex = new Object();
+
+    public static DbHelper getInstance(Context context)
+    {
+        if(Instance==null)
+        {
+            synchronized (mutex)
+            {
+                if(Instance==null)
+                {
+                    Instance = new DbHelper(context);
+                }
+            }
+        }
+        return Instance;
+    }
+
+    private DbHelper(Context context)
     {
         super(context, DB_NAME, null ,DB_SCHEME_VERSION);
         DB = this.getWritableDatabase();

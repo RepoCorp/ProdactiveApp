@@ -10,7 +10,7 @@ import java.util.Date;
  * Created by D on 22/08/2014.
  */
 public class Preferences {
-    private SharedPreferences prf;
+    private final SharedPreferences prf;
     private static final String User      = "co.com.zeitgeist.prodactiveapp.user";
     private static final String Pass      = "co.com.zeitgeist.prodactiveapp.pass";
     private static final String Contador  = "co.com.zeitgeist.prodactiveapp.contador";

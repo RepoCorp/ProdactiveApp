@@ -26,6 +26,7 @@
             android:windowSoftInputMode="adjustResize|stateVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -35,16 +36,14 @@
             android:screenOrientation="portrait" >
         </activity>
 
-        <service
-            android:name=".service.StepService"
-            android:process="co.com.prodactive.StepServiceProcess" >
+        <service android:name=".service.StepService"
+                 android:process="co.com.prodactive.StepServiceProcess">
 
             <!-- android:process="co.com.prodactive.StepServiceProcess" -->
             <intent-filter>
                 <action android:name="co.com.zeitgeist.prodactive.MESSAGE_TO_STEPSERVICE" />
                 <action android:name="co.com.zeitgeist.prodactive.RESTAR_COUNTER_ON_STEPSERVICE" />
                 <action android:name="co.com.zeitgeist.prodactive.INIT_PRODACTIVE" />
-
             </intent-filter>
         </service>
         <service
@@ -57,12 +56,20 @@
             android:exported="true" >
         </service>
 
-        <receiver android:name="co.com.zeitgeist.prodactiveapp.service.BootReceiver" android:enabled="true" android:exported="false">
+        <receiver
+            android:name=".service.BootReceiver"
+            android:enabled="true"
+            android:exported="false" >
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
+        <service
+            android:name=".service.UploadService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->

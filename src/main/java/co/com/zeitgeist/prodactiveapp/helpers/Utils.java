@@ -15,10 +15,10 @@ public class Utils {
 
     private Integer Steps;
     private Integer LastSteps;
-    private String  user;
-    private Object  obj = new Object();
-    private boolean sw  = false;
-    private Preferences     p;
+    //private String  user;
+    //private Object  obj = new Object();
+    //private boolean sw  = false;
+    private final Preferences     p;
 
     private final Object mutex = new Object();
 
@@ -126,6 +126,11 @@ public class Utils {
 
     public String[] GetUserPass() {
         return p.GetUserPass();
+    }
+
+    public void SaveUser(String user,String pass)
+    {
+        p.SaveUserPass(user,pass);
     }
 
     public void RestartSteps() {
