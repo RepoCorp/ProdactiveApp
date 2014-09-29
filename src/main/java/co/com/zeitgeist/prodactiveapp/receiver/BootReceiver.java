@@ -1,4 +1,4 @@
-package co.com.zeitgeist.prodactiveapp.service;
+package co.com.zeitgeist.prodactiveapp.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,7 +10,7 @@ import co.com.zeitgeist.prodactiveapp.activity.SplashScreenActivity;
 /**
  * Created by D on 22/09/2014.
  */
-class BootReceiver extends BroadcastReceiver {
+public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {

@@ -6,19 +6,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Bundle;
 import android.util.Log;
 
 import co.com.zeitgeist.prodactiveapp.activity.LoginActivity;
 
-public class ProdactiveLauch extends Service {
+public class ProdactiveLauchService extends Service {
+
+    public static final String TAG = "co.com.zeitgeist.prodactiveapp.prodactivelaunch";
+
     public ProdactiveLauch() {
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
 
         boolean sw= false;
         try{
@@ -44,38 +48,20 @@ public class ProdactiveLauch extends Service {
         return START_STICKY;
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void onDestroy() {
-
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    /*
-    BroadcastReceiver receiverBoot= new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
+    public final IBinder       mBinder = new LaunchBinder();
 
-            Intent service = new Intent(context, ProdactiveLauch.class);
-            context.startService(service);
-
-
+    public class LaunchBinder extends Binder {
+        public StepService getService() {
+            return ProdactiveLauchService.this;
         }
-    };*/
+    }
+
 }
 
 

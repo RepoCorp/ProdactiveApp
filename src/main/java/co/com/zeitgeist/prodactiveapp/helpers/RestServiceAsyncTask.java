@@ -1,13 +1,9 @@
-package co.com.zeitgeist.prodactiveapp.service;
+package co.com.zeitgeist.prodactiveapp.helpers;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
-import co.com.zeitgeist.prodactiveapp.R;
 import co.com.zeitgeist.prodactiveapp.database.DbHelper;
-import co.com.zeitgeist.prodactiveapp.database.TablaLogEjercicio;
 import co.com.zeitgeist.prodactiveapp.database.model.LogEjercicio;
 import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
 

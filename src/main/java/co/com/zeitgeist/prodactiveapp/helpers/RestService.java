@@ -1,4 +1,4 @@
-package co.com.zeitgeist.prodactiveapp.service;
+package co.com.zeitgeist.prodactiveapp.helpers;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
