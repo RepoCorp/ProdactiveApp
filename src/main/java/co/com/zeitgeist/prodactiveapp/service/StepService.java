@@ -74,9 +74,11 @@ public class StepService extends Service implements SensorEventListener{
 
 
 
-    private BroadcastReceiver receiver= new BroadcastReceiver() {
+    private BroadcastReceiver receiver= new BroadcastReceiver()
+    {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
 
             if(intent.getAction().equals(PedometroActivity.MessageToStepService))
             {
@@ -87,21 +89,19 @@ public class StepService extends Service implements SensorEventListener{
             {
                 SendBroadcast();
             }
-
         }
     };
-
-
 
     @Override
     public void onCreate() {
         super.onCreate();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
 /*        Context ctx = getApplicationContext();
         util=Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(ctx));*/
-        util=Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
+        util=Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         Log.i("User?",util.GetUserPass()[0]+" " +util.GetUserPass()[1]);
 
         //receiver   = new ComunicationStepServiceReceiver();
@@ -114,20 +114,18 @@ public class StepService extends Service implements SensorEventListener{
         //s=this;
     }
 
-    public void onDestroy()
-    {
-        util.UpdateLastStep(util.GetStepsFromLastReport());
-        unregisterReceiver(receiver);
-        SaveLogEjercicio();
+    @Override
+    public void onDestroy() {
         super.onDestroy();
+
     }
 
-    /*
-    public class LocalBinder extends Binder {
-        public StepService getService() {
-            return StepService.this;
-        }
-    }*/
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.i("StepService Removed","Stated Saved");
+        SaveState();
+        super.onTaskRemoved(rootIntent);
+    }
 
     //BINDING
     @Override
@@ -192,12 +190,43 @@ public class StepService extends Service implements SensorEventListener{
                 mLastValues[k] = v;
 
             }
-                break;
+            break;
 
             default: break;
         }
 
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    private void SaveState()
+   {
+       util.UpdateLastStep(util.GetStepsFromLastReport());
+       unregisterReceiver(receiver);
+       SaveLogEjercicio();
+
    }
+
+
+    /*
+    @Override
+    public void onDestroy()
+    {
+        util.UpdateLastStep(util.GetStepsFromLastReport());
+        unregisterReceiver(receiver);
+        SaveLogEjercicio();
+        super.onDestroy();
+    }
+*/
+    /*
+    public class LocalBinder extends Binder {
+        public StepService getService() {
+            return StepService.this;
+        }
+    }*/
+
 
     private void Process()
     {
@@ -280,8 +309,5 @@ public class StepService extends Service implements SensorEventListener{
         sendBroadcast   (intent);
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
 
-    }
 }

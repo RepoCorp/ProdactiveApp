@@ -36,8 +36,8 @@
             android:screenOrientation="portrait" >
         </activity>
 
-        <service android:name=".service.StepService"
-                 android:process="co.com.prodactive.StepServiceProcess">
+        <service android:name=".service.StepService" android:process="co.com.prodactive.StepServiceProcess"
+                 >
 
             <!-- android:process="co.com.prodactive.StepServiceProcess" -->
             <intent-filter>
@@ -51,13 +51,13 @@
             android:enabled="true" >
         </service>
         <service
-            android:name=".service.ProdactiveLauch"
+            android:name=".service.ProdactiveLauchService"
             android:enabled="true"
             android:exported="true" >
         </service>
 
         <receiver
-            android:name=".service.BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="false" >
             <intent-filter>

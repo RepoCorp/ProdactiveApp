@@ -18,77 +18,75 @@ public class Utils {
     //private String  user;
     //private Object  obj = new Object();
     //private boolean sw  = false;
-    private final Preferences     p;
+    private final Preferences p;
 
     private final Object mutex = new Object();
 
-    public static Utils GetInstance(SharedPreferences prf)
-    {
-        if(instance==null)
-        {
+    public static Utils GetInstance(SharedPreferences prf) {
+        if (instance == null) {
             instance = new Utils(prf);
         }
         return instance;
     }
-    private Utils(SharedPreferences prf)
-    {
-        p     = Preferences.GetInstance(prf);
-        int i=p.GetUltimoReporte();
-        if(i==-1)
+
+    private Utils(SharedPreferences prf) {
+        p = Preferences.GetInstance(prf);
+        int i = p.GetUltimoReporte();
+        if (i == -1)
             Steps = LastSteps = 0;
-        else
-        {
-            Steps= LastSteps = i;
+        else {
+            Steps = LastSteps = i;
         }
     }
 
     public Integer getSteps() {
         return Steps;
     }
-    public int incrementSteps()
-    {
-        synchronized (mutex)
-        {
+
+    public int incrementSteps() {
+        synchronized (mutex) {
             Steps++;
             return Steps;
         }
     }
+
     public void setSteps(Integer steps) {
 
         Steps = steps;
     }
-    public Integer GetStepsFromLastReport()
-    {
-        synchronized (mutex)
-        {
+
+    public Integer GetStepsFromLastReport() {
+        synchronized (mutex) {
             Integer pasos;
-            if(LastSteps==0)
-                pasos=Steps;
+            if (LastSteps == 0)
+                pasos = Steps;
             else
-                pasos=Steps-LastSteps;
+                pasos = Steps - LastSteps;
 
             return pasos;
         }
     }
 
-    public void UpdateLastStep(Integer value)
-    {
+    public void UpdateLastStep(Integer value) {
         LastSteps += value;
         p.SaveUltimoReporte(LastSteps);
     }
-    public String GetUser()
-    {
+
+    public String GetUser() {
         return p.GetUserPass()[0];
     }
 
-    public void SetWeight(int weight)
-    {
+    public void PutWeight(int weight) {
         p.PutWeigth(weight);
     }
 
-    public void SetHeight(float height)
-    {
+    public void PutHeight(float height) {
         p.PutHeight(height);
+    }
+
+    public void PutSex(String sex)
+    {
+        p.PutSexo(sex);
     }
     public String GetSex()
     {

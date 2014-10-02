@@ -2,6 +2,7 @@ package co.com.zeitgeist.prodactiveapp.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -14,6 +15,7 @@ import co.com.zeitgeist.prodactiveapp.database.Insertable;
 import co.com.zeitgeist.prodactiveapp.database.TablaLogEjercicio;
 import co.com.zeitgeist.prodactiveapp.database.model.LogEjercicio;
 import co.com.zeitgeist.prodactiveapp.helpers.Utils;
+import co.com.zeitgeist.prodactiveapp.helpers.RestServiceAsyncTask;
 
 public class UploadService extends Service {
     private Utils utils;
@@ -26,17 +28,23 @@ public class UploadService extends Service {
 
     }
 
-
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
 
-        utils = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
+    }
 
+
+    public void load(Intent intent)
+    {
+        utils = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         try {
+
             if (intent.hasExtra("User")) {
                 User = intent.getStringExtra("User");
             } else
                 User = utils.GetUser();
+
         } catch (NullPointerException ex){
             Log.e("Error en el intent","null");
         }
@@ -46,16 +54,32 @@ public class UploadService extends Service {
         Integer timeOutReport   = 5 * 60 * 1000;
         //Integer timeOutReport   = 40 * 1000;
         timer.schedule(els, timeOutReport, timeOutReport);
-        Db= DbHelper.getInstance(this);
+        //timer.schedule(els, 10000, timeOutReport);
+        Db= DbHelper.getInstance(getApplicationContext());
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        //utils = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
+
         return START_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        load(intent);
+        return mBinder;
     }
 
+    private final IBinder       mBinder = new UploadBinder();
+
+    public class UploadBinder extends Binder {
+        public UploadService getService() {
+            return UploadService.this;
+        }
+    }
 
 
     private class EnvioLogServicio extends TimerTask

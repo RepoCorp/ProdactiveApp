@@ -12,12 +12,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 import co.com.zeitgeist.prodactiveapp.activity.LoginActivity;
+import co.com.zeitgeist.prodactiveapp.activity.PedometroActivity;
 
 public class ProdactiveLauchService extends Service {
 
     public static final String TAG = "co.com.zeitgeist.prodactiveapp.prodactivelaunch";
 
-    public ProdactiveLauch() {
+    public ProdactiveLauchService() {
 
     }
 
@@ -37,11 +38,14 @@ public class ProdactiveLauchService extends Service {
         }catch (NullPointerException ex){
             Log.e("ProdactiveLaunc OnStarCommand","the intent not contain extras");
         }
-        Intent mainIntent = new Intent().setClass(this, LoginActivity.class);
+        //Intent mainIntent = new Intent().setClass(this, LoginActivity.class);
+        Intent mainIntent = new Intent().setClass(this, PedometroActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if(!sw)
             mainIntent.putExtra("isRestarting",true);
         startActivity(mainIntent);
+
+
 
         // Close the activity so the user won't able to go back this
         // activity pressing Back button
@@ -57,10 +61,12 @@ public class ProdactiveLauchService extends Service {
     public final IBinder       mBinder = new LaunchBinder();
 
     public class LaunchBinder extends Binder {
-        public StepService getService() {
+        public ProdactiveLauchService getService() {
             return ProdactiveLauchService.this;
         }
     }
+
+
 
 }
 

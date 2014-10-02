@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import co.com.zeitgeist.prodactiveapp.R;
-import co.com.zeitgeist.prodactiveapp.service.ProdactiveLauch;
+import co.com.zeitgeist.prodactiveapp.service.ProdactiveLauchService;
 
 public class SplashScreenActivity extends Activity {
 
@@ -34,13 +34,13 @@ public class SplashScreenActivity extends Activity {
             public void run() {
 
                 // Start the next activity
-/*
                 Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, LoginActivity.class);
                 startActivity(mainIntent);
-*/
-                Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, ProdactiveLauch.class);
-                mainIntent.putExtra("firstLaunch",true);
-                startService(mainIntent);
+
+                //Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, ProdactiveLauchService.class);
+                //mainIntent.putExtra("firstLaunch",true);
+                //startService(mainIntent);
+
 
                 // Close the activity so the user won't able to go back this
                 // activity pressing Back button

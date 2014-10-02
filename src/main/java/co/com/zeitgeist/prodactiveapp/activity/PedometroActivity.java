@@ -10,13 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
-
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -24,30 +21,17 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import co.com.zeitgeist.prodactiveapp.R;
-import co.com.zeitgeist.prodactiveapp.database.DbHelper;
-import co.com.zeitgeist.prodactiveapp.database.Insertable;
-import co.com.zeitgeist.prodactiveapp.database.TablaLogEjercicio;
-import co.com.zeitgeist.prodactiveapp.database.model.LogDiario;
-import co.com.zeitgeist.prodactiveapp.database.model.LogEjercicio;
-import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
 import co.com.zeitgeist.prodactiveapp.helpers.Utils;
-import co.com.zeitgeist.prodactiveapp.service.RestService;
 import co.com.zeitgeist.prodactiveapp.service.StepService;
 import co.com.zeitgeist.prodactiveapp.service.UploadService;
 
-
 public class PedometroActivity extends Activity {
 
-    public final static  String MessageToStepService="co.com.zeitgeist.prodactive.MESSAGE_TO_STEPSERVICE";
+    public final static String MessageToStepService="co.com.zeitgeist.prodactive.MESSAGE_TO_STEPSERVICE";
     public final static String RestartCounterOnStepService="co.com.zeitgeist.prodactive.RESTAR_COUNTER_ON_STEPSERVICE";
     public final static String InitProdactive="co.com.zeitgeist.prodactive.INIT_PRODACTIVE";
     public final static String IsRestarted ="restarted";
@@ -81,6 +65,8 @@ public class PedometroActivity extends Activity {
     private DecimalFormatSymbols decimalFormatSymbols     = new DecimalFormatSymbols();
     private DecimalFormat decimalFormat;
 
+    UploadService uploadService=null;
+
 
 
     @Override
@@ -93,13 +79,17 @@ public class PedometroActivity extends Activity {
         setContentView(R.layout.activity_pedometro);
 
         activity = this;
-        utils    = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
+        utils    = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         //Db       = DbHelper.getInstance(activity);
+
+        decimalFormatSymbols.setDecimalSeparator('.');
+        decimalFormatSymbols.setGroupingSeparator(',');
+        decimalFormat = new DecimalFormat("#,##0.00", decimalFormatSymbols);
+
 
         loadContent();
         GetStepLength(utils.GetSex(),utils.GetHeight());
         BodyWeight= utils.GetWeight();
-
 
 
         IntentFilter filter = new IntentFilter();
@@ -111,29 +101,28 @@ public class PedometroActivity extends Activity {
         Intent intent1 = new Intent(this,ComunicationStepService.class);
         startService(intent1);
 
-        bindStepService();
+        bindComunicationService();
         //bindService(msgStepIntent,mConnection,Context.BIND_AUTO_CREATE);
 
        // bindStepService();
-        if(isMyServiceRunning(StepService.class)){
+        /*if(isMyServiceRunning(StepService.class)){
             Toast.makeText(this,"Service was Running",Toast.LENGTH_LONG).show();
         }else
         {
             Intent stepIntent = new Intent(this, StepService.class);
             stepIntent.putExtra("User",User);
             startService(stepIntent);
-        }
-        if(isMyServiceRunning(UploadService.class)){
+        }*/
+
+        /*if(isMyServiceRunning(UploadService.class)){
             Toast.makeText(this,"Service was Running",Toast.LENGTH_LONG).show();
         }else
         {
             Intent stepIntent = new Intent(this, UploadService.class);
             stepIntent.putExtra("User",User);
             startService(stepIntent);
-        }
-            decimalFormatSymbols.setDecimalSeparator('.');
-            decimalFormatSymbols.setGroupingSeparator(',');
-            decimalFormat = new DecimalFormat("#,##0.00", decimalFormatSymbols);
+        }*/
+
         //s.SendInitApp();
         }catch(Exception ex)
         {
@@ -197,10 +186,7 @@ public class PedometroActivity extends Activity {
                                 int contpasos=intent.getIntExtra(StepService.Steps, 0);
                                 utils.setSteps(contpasos);
                                 //actualizo interfaz gráfica
-                                Calories = contpasos *  (BodyWeight * METRIC_WALKING_FACTOR //(mIsRunning ? METRIC_RUNNING_FACTOR : METRIC_WALKING_FACTOR))
-                                        // Distance:
-                                        * StepLength // centimeters
-                                        / 100000.0); // centimeters/kilometer
+                                Calories = GetCalories(contpasos);
 
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -224,6 +210,14 @@ public class PedometroActivity extends Activity {
 
         }
     };
+
+    private double GetCalories(int contpasos){
+        return contpasos *  (BodyWeight * METRIC_WALKING_FACTOR //(mIsRunning ? METRIC_RUNNING_FACTOR : METRIC_WALKING_FACTOR))
+                // Distance:
+                * StepLength // centimeters
+                / 100000.0); // centimeters/kilometer
+
+    }
 
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -258,27 +252,47 @@ public class PedometroActivity extends Activity {
         pasos    = (TextView) findViewById(R.id.pasosView);
         calorias = (TextView) findViewById(R.id.caloriasView);
 
+
+
+        pasos.setText(utils.getSteps().toString());
+        calorias.setText(decimalFormat.format(GetCalories(utils.getSteps())));
+
         TextView userdata =(TextView) findViewById(R.id.user_data);
         User=utils.GetUser();
         userdata.setText(" Bienvenido "+User);
     }
 
-    private void bindStepService() {
-        Log.i("BindStepService", "[SERVICE] Bind");
+    private void bindComunicationService() {
+
         //bindService(new Intent(this,ComunicationStepService.class), mConnection, Context.BIND_AUTO_CREATE + Context.BIND_DEBUG_UNBIND);
         Intent msgStepIntent = new Intent(getApplicationContext(),ComunicationStepService.class);
         try{
             bindService(msgStepIntent, mConnection, Context.BIND_AUTO_CREATE);
+            Log.i("BindComunicationService", "[SERVICE Comunication] Bind");
         }catch (Exception ex)
         {
             Log.e("Error Bind Service",ex.getMessage());
         }
 
+        try{
+            Intent stepIntent= new Intent(getApplicationContext(),UploadService.class);
+            stepIntent.putExtra("User",User);
+            bindService(stepIntent,mConnetionUpload,Context.BIND_AUTO_CREATE);
+            Log.i("BindUploadService", "[SERVICE Upload] Bind");
+        }
+        catch(Exception ex)
+        {
+
+        }
+
+
     }
     private void unbindStepService() {
-        Log.i("UnBindStepService", "[SERVICE] Unbind");
+        Log.i("UnBindStepService", "[SERVICE Comunication] Unbind");
         if(mConnection!=null)
             unbindService(mConnection);
+        if(mConnetionUpload !=null)
+            unbindService(mConnetionUpload);
     }
 
     /**
@@ -340,6 +354,18 @@ public class PedometroActivity extends Activity {
         }
     };
 
+    private ServiceConnection mConnetionUpload = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            UploadService.UploadBinder b= (UploadService.UploadBinder) iBinder;
+            uploadService= b.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            uploadService=null;
+        }
+    };
 
     public static class ComunicationStepService extends Service
     {

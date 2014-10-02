@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
@@ -27,7 +29,7 @@ import co.com.zeitgeist.prodactiveapp.config.Preferences;
 import co.com.zeitgeist.prodactiveapp.database.DbHelper;
 import co.com.zeitgeist.prodactiveapp.database.model.LoginResponse;
 import co.com.zeitgeist.prodactiveapp.helpers.Utils;
-import co.com.zeitgeist.prodactiveapp.service.RestService;
+import co.com.zeitgeist.prodactiveapp.helpers.RestService;
 
 
 /**
@@ -39,11 +41,11 @@ public class LoginActivity extends Activity{
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    public UserLoginTask mAuthTask = null;
 
     // UI references.
     private EditText mUserView;
-    private EditText mPasswordView;
+    public  EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private Button mEmailSignInButton;
@@ -156,6 +158,16 @@ public class LoginActivity extends Activity{
         }
     }
 
+    public boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 4;
@@ -202,89 +214,7 @@ public class LoginActivity extends Activity{
         }
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mUser;
-        private final String mPassword;
-        final LoginActivity activity;
-
-        UserLoginTask(String user, String password,LoginActivity activity) {
-            mUser            = user;
-            mPassword        = password;
-            this.activity    = activity;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            //aqui va el logueo
-
-            //Preferences p = Preferences.GetInstance(activity.getPreferences(Context.MODE_PRIVATE));
-            Preferences p = Preferences.GetInstance(PreferenceManager.getDefaultSharedPreferences(getBaseContext()));
-            String[]    datos = p.GetUserPass();
-            if(!datos[0].isEmpty() && !datos[1].isEmpty())
-            {
-                if(datos[0].equals(mUser) && datos[1].equals(mPassword))
-                {
-                    return true;
-                }
-            }
-
-            String url = "http://prodactive.co/api/login/"+mUser+"/"+mPassword+"?format=json";
-            RestService<LoginResponse> r= new RestService<LoginResponse>();
-            try {
-                LoginResponse response = r.Send(url, new LoginResponse());
-                if (response.State) {
-                    DbHelper h = DbHelper.getInstance(activity);
-                    try{
-                        //h.Insert(response.Persona);
-                    }catch (Exception ex){
-                     Log.e("Login Insert Persona",ex.getMessage());
-                    }
-                    p.PutWeigth(response.Persona.Peso.intValue());
-                    p.PutHeight(response.Persona.Estatura.floatValue());
-                    p.PutSexo(response.Persona.Sexo);
-                    if(!mPassword.equals(""))
-                        p.SaveUserPass(mUser, mPassword);
-                } else
-                    return false;
-            }catch (Exception ex){
-                return false;
-            }
-            //guardar localmente los datos, para evitar ir al servidor la proxima vez
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                Intent intent = new Intent(activity, PedometroActivity.class);
-                intent.putExtra(PedometroActivity.IsRestarted,sw);
-                //intent.putExtra(PedometroActivity.IsRestarted,true);
-                startActivity(intent);
-                activity.finish();
-                finish();
-                //cargo la otra actividad
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 
 

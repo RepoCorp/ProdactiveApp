@@ -12,7 +12,7 @@ import co.com.zeitgeist.prodactiveapp.database.model.ServiceResponse;
  * por el momento no se esta usando
  */
 
-class RestServiceAsyncTask extends AsyncTask<LogEjercicio, Void,LogEjercicio> {
+public class RestServiceAsyncTask extends AsyncTask<LogEjercicio, Void,LogEjercicio> {
 
     private final DbHelper Db;
     public RestServiceAsyncTask(DbHelper db)
@@ -53,7 +53,5 @@ class RestServiceAsyncTask extends AsyncTask<LogEjercicio, Void,LogEjercicio> {
         catch(Exception ex){
             Log.e("RestServiceAsyncTask onPostExecute",ex.getMessage());
         }
-
-
     }
 }
