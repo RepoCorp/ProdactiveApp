@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -34,22 +33,16 @@ public class PedometroActivity extends Activity {
     public final static String MessageToStepService="co.com.zeitgeist.prodactive.MESSAGE_TO_STEPSERVICE";
     public final static String RestartCounterOnStepService="co.com.zeitgeist.prodactive.RESTAR_COUNTER_ON_STEPSERVICE";
     public final static String InitProdactive="co.com.zeitgeist.prodactive.INIT_PRODACTIVE";
-    public final static String IsRestarted ="restarted";
+    //public final static String IsRestarted ="restarted";
 
     private Activity activity;
-    //Receiver broadcastReceiver;
     private TextView pasos;
     private TextView calorias;
-    //private Date     lastReport;
     private Utils    utils;
-    //private DbHelper Db;
     private ComunicationStepService s;
-    //private String User="";
 
     private final Object  obj     = new Object();
     private boolean sw            = false;
-    //private final Object  mutex   = new Object();
-    //private boolean sw2           = false;
     private Double  Calories      = 0.0;
     private double  StepLength    = 0;
     private double  BodyWeight    = 0;
@@ -61,69 +54,37 @@ public class PedometroActivity extends Activity {
 
     private final static double METRIC_WALKING_FACTOR   = 0.708;
     //private final static double IMPERIAL_WALKING_FACTOR = 0.517;
-
     private DecimalFormatSymbols decimalFormatSymbols     = new DecimalFormatSymbols();
     private DecimalFormat decimalFormat;
 
     UploadService uploadService=null;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try{
 
-        moveTaskToBack(getIntent().getBooleanExtra(IsRestarted,false));
-
         setContentView(R.layout.activity_pedometro);
 
         activity = this;
         utils    = Utils.GetInstance(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
-        //Db       = DbHelper.getInstance(activity);
-
         decimalFormatSymbols.setDecimalSeparator('.');
         decimalFormatSymbols.setGroupingSeparator(',');
         decimalFormat = new DecimalFormat("#,##0.00", decimalFormatSymbols);
-
 
         loadContent();
         GetStepLength(utils.GetSex(),utils.GetHeight());
         BodyWeight= utils.GetWeight();
 
-
         IntentFilter filter = new IntentFilter();
-
         filter.addAction(StepService.Paso);
         registerReceiver(receiver , filter);
 
-        //startService(msgStepIntent);
         Intent intent1 = new Intent(this,ComunicationStepService.class);
         startService(intent1);
 
         bindComunicationService();
-        //bindService(msgStepIntent,mConnection,Context.BIND_AUTO_CREATE);
 
-       // bindStepService();
-        /*if(isMyServiceRunning(StepService.class)){
-            Toast.makeText(this,"Service was Running",Toast.LENGTH_LONG).show();
-        }else
-        {
-            Intent stepIntent = new Intent(this, StepService.class);
-            stepIntent.putExtra("User",User);
-            startService(stepIntent);
-        }*/
-
-        /*if(isMyServiceRunning(UploadService.class)){
-            Toast.makeText(this,"Service was Running",Toast.LENGTH_LONG).show();
-        }else
-        {
-            Intent stepIntent = new Intent(this, UploadService.class);
-            stepIntent.putExtra("User",User);
-            startService(stepIntent);
-        }*/
-
-        //s.SendInitApp();
         }catch(Exception ex)
         {
             Log.e("ErrorOnCreateApp",ex.getMessage());
@@ -164,9 +125,8 @@ public class PedometroActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -295,57 +255,14 @@ public class PedometroActivity extends Activity {
             unbindService(mConnetionUpload);
     }
 
-    /**
-     * Esta clase se encarga de recibir la notificacion de pasos desde el servicio StepService
-     */
-
-    /**
-     * Revisa constantemente la base de datos de LogEjercicios y lo reporta al servidor
-     */
-  /*
-    private class EnvioLogServicio extends TimerTask
-    {
-        @Override
-        public void run() {
-
-            Log.i("EnvioLogServicio","Se ha iniciado reporte");
-            TablaLogEjercicio t= new TablaLogEjercicio();
-            for (Insertable insertable : Db.Select(t.SelectAll(), t)) {
-                LogEjercicio le = (LogEjercicio) insertable;
-                if (le.Usuario.equals("")) {
-                    le.Usuario = utils.GetUser();
-                }
-                final String url = "http://prodactive.co/api/LogEjercicio/" + le.Usuario + "/" + le.Fecha + "/lat=lon=/" + le.Conteo + "/0?format=json";
-                //AsyncTask<String,Void,ServiceResponse> task
-                try {
-
-                    RestService<ServiceResponse> sr = new RestService<ServiceResponse>();
-                    ServiceResponse response = sr.Send(url, new ServiceResponse());
-                    if (response.State) {
-                        Db.Delete(le);
-                    }
-                } catch (Exception ex) {
-                    Log.e("EnvioLogServicio", ex.getMessage());
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        new RestServiceAsyncTask(activity,true).execute(url);
-                    }
-                });
-            }
-        }
-    }
-*/
     //objeto que permite comunicar localmente con el servicio ComunicacionStepService, para enviar los
     //broadcast al StepService
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection mConnection      = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder binder) {
             ComunicationStepService.LocalBinder b = (ComunicationStepService.LocalBinder) binder;
             s = b.getService();
-            Toast.makeText(activity, "Connected", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(activity, "Connected", Toast.LENGTH_SHORT).show();
             s.SendInitApp();
         }
 
